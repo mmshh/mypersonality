@@ -38,6 +38,10 @@ if __name__ == '__main__':
 
     reg = LinearRegression()
 
-    reg.fit(X, y)
-    pickle.dump(reg, open("../resources/LinearReg_Personality.sav", 'wb'))
-    # print(np.sqrt(np.average((y_test - predict) ** 2, axis=0)))
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=42)
+
+    reg.fit(X_train, y_train)
+    predict = reg.predict(X_test)
+
+    # pickle.dump(reg, open("../resources/LinearReg_Personality.sav", 'wb'))
+    print(np.sqrt(np.average((y_test - predict) ** 2, axis=0)))

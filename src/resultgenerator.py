@@ -3,8 +3,8 @@ import pickle
 import pandas as pd
 import numpy as np
 
-from classifiers.combined_classifier import CombinedClassifier
-from util import Utils
+from src.classifiers.combined_classifier import CombinedClassifier
+from src.util import Utils
 
 abs_path = os.path.dirname(os.path.abspath(__file__))
 
@@ -84,6 +84,23 @@ def compute_age(test_data_path, df_results):
     return df_results.drop(columns='age')
 
 
+def compute_age2(test_data_path, df_results):
+    model_path = os.path.join(abs_path, os.path.join("resources", "SGD_Age1.sav"))
+    profile_df = Utils.read_data_to_dataframe(test_data_path + "/Profile/Profile.csv")
+
+    profile_df.drop(profile_df.columns.difference(['userid', 'age']), 1, inplace=True)
+    relation_df = Utils.read_data_to_dataframe(test_data_path + "/Relation/Relation.csv")
+    relation_df.rename(columns={'userId': 'userid'}, inplace=True)
+
+    merged_df = pd.merge(relation_df, profile_df, on='userid')
+    merged_df.drop(['age'], axis=1, inplace=True)
+
+    one_hot_df = Utils.one_hot_encode(merged_df, 'userid', 'like_id')
+    model = Utils.read_pickle_from_file(model_path)
+    predictions = model.predict(one_hot_df)
+    gooz=""
+
+
 def compute_personality(test_data_path, df_results):
     model_path = os.path.join(abs_path, os.path.join("resources", "LinearReg_Personality.sav"))
     profile_df = Utils.read_data_to_dataframe(test_data_path + "/Profile/Profile.csv")
@@ -134,7 +151,7 @@ class ResultGenerator:
         df_results = generate_df_for_all_users(profiles, model)
 
         df_results = compute_gender(test_data_path, df_results)
-        df_results = compute_age(test_data_path, df_results)
+        df_results = compute_age2(test_data_path, df_results)
         df_results = compute_personality(test_data_path, df_results)
 
         xml_dictionary = self.generate_xml_from_profiles(df_results)

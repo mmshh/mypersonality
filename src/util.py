@@ -5,6 +5,7 @@ import pickle
 
 import numpy as np
 import pandas as pd
+from sklearn import feature_extraction
 from sklearn.decomposition import FastICA
 from sklearn.feature_selection import RFE
 from sklearn.model_selection import train_test_split
@@ -175,3 +176,12 @@ class Utils:
         from sklearn.metrics import classification_report
         print('Results on the test set:')
         print(classification_report(y_true, y_pred))
+
+    @staticmethod
+    def one_hot_encode(df, group_col, encode_col):
+        grouped = df.groupby(group_col)[encode_col].apply(lambda lst: tuple((k, 1) for k in lst))
+        category_dicts = [dict(tuples) for tuples in grouped]
+        v = feature_extraction.DictVectorizer(sparse=False)
+        X = v.fit_transform(category_dicts)
+        one_hot = pd.DataFrame(X, columns=v.get_feature_names(), index=grouped.index)
+        return one_hot

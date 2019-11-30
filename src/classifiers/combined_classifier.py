@@ -8,7 +8,7 @@ from sklearn.model_selection import cross_val_score
 import warnings
 
 
-from util import Utils
+from src.util import Utils
 
 warnings.filterwarnings("ignore")
 
@@ -63,6 +63,17 @@ class CombinedClassifier:
                                       labels=["xx-24", "25-34", "35-49", "50-xx"],
                                       right=False)
         return merged_df
+
+    @staticmethod
+    def read_nrc():
+        util = Utils()
+        profile_df = util.read_data_to_dataframe("../../data/Train/Profile/Profile.csv")
+        nrc_df = util.read_data_to_dataframe("../../data/Train/Text/nrc.csv")
+        nrc_df.rename(columns={'userId': 'userid'}, inplace=True)
+        merged_df = pd.merge(nrc_df, profile_df, on='userid')
+        return merged_df.filter(['userid', 'positive', 'negative', 'anger', 'anticipation', 'disgust',
+                                 'fear', 'joy', 'sadness', 'surprise', 'trust', 'age'],
+                                axis=1)
 
     def merge_images_piwc(self, is_train=True, profiles_path="../../data/Train/Profile/Profile.csv",
                           liwc_path="../../data/Train/Text/liwc.csv",
