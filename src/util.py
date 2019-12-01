@@ -178,10 +178,17 @@ class Utils:
         print(classification_report(y_true, y_pred))
 
     @staticmethod
-    def one_hot_encode(df, group_col, encode_col):
+    def one_hot_encode(df, group_col, encode_col, train=True):
         grouped = df.groupby(group_col)[encode_col].apply(lambda lst: tuple((k, 1) for k in lst))
         category_dicts = [dict(tuples) for tuples in grouped]
-        v = feature_extraction.DictVectorizer(sparse=False)
-        X = v.fit_transform(category_dicts)
-        one_hot = pd.DataFrame(X, columns=v.get_feature_names(), index=grouped.index)
+        if train:
+            v = feature_extraction.DictVectorizer(sparse=False)
+            X = v.fit_transform(category_dicts)
+            pickle.dump(v, open("../resources/encoder.pkl", 'wb'))
+            one_hot = pd.DataFrame(X, columns=v.get_feature_names(), index=grouped.index)
+        else:
+            enc = Utils.read_pickle_from_file("resources/encoder.pkl")
+            X = enc.transform(category_dicts)
+            one_hot = pd.DataFrame(X, columns=enc.get_feature_names(), index=grouped.index)
+
         return one_hot
